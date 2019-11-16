@@ -116,9 +116,38 @@ ggplot() +
 # Compare mean lobster sizes at MPA vs. non-MPA sites in 2012 and 2018
 # Consolidate the size observations into only two groups, MPA and non-MPA lobsters
 
+mpa_status_lobster <- uncntd_lobster_abundance %>% 
+  mutate(status = case_when(
+    site %in% c("CARP", "MOHK", "AQUE") ~ "non-MPA", TRUE ~ "MPA"))
 
 ```
 
+
+
+```{r}
+#answer 4 questions
+# 1. For 2012 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
+
+mpa_2012_sample_ <- mpa_status_lobster %>%
+  filter(year == 2012) %>% 
+  filter(status == "MPA") %>% 
+  pull(size_mm)
+
+non_mpa_2012_sample <- mpa_status_lobster %>%
+  filter(year == 2012) %>% 
+  filter(status == "non-MPA") %>% 
+  pull(size_mm)
+
+
+
+```
+
+
+```{r}
+# 2. For 2018 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
+# 3. For MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
+# 4. For non-MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
+```
 
 ### Summary
 
