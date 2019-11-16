@@ -1,0 +1,126 @@
+---
+title: "Lobster lab report"
+author: "Kazia Mermel"
+date: "11/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# install packages and read in data
+library(tidyverse)
+library(janitor)
+library(tidyr)
+
+lobster_abundance <-  read_csv("lobster_abundance_sbc_lter.csv") %>% 
+  clean_names() #%>% 
+  #tidyr::uncount(count)
+```
+
+### Introduction
+
+
+### Data and Methods
+
+
+### Results
+
+#### Results A
+
+```{r}
+# visually explore changes in annual lobster abundance (counts) by site
+# first, group observations to find lobster counts per year
+# create a finalized data visualization showing changes in annual lobster abundance at the five sites over time
+
+yr_lobster_abundance <- lobster_abundance %>% 
+  group_by(year)
+
+ggplot(data = yr_lobster_abundance, aes(x = year, y = count)) +
+  geom_col(aes(fill = site))
+```
+Figure 1: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL) are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP),
+
+Total spiny lobster abundance across sites generally seems to have increased between 2012 and 2018. Abundance at the CARP and IVEE sites in particular have increased. Abundance at AQUE has remained nearly constant.
+
+#### Results B
+
+```{r}
+# visually explore lobster size distribution shifts by comparing lobster sizes in 2012 and 2018
+# explore size distributions for lobsters at the 5 different sites in 2012 and in 2018
+# I'll make a total of 10 distributions
+
+# need to make sure there is one observation per row for this graph, I do believe
+
+uncntd_lobster_abundance <- lobster_abundance %>% 
+  tidyr::uncount(count)
+
+ivee_abundance <- uncntd_lobster_abundance %>%
+  filter(year == c(2012, 2018)) %>% 
+  filter(site == "IVEE")
+
+napl_abundance <- uncntd_lobster_abundance %>%
+  filter(year == c(2012, 2018)) %>% 
+  filter(site == "NAPL")
+
+aque_abundance <- uncntd_lobster_abundance %>%
+  filter(year == c(2012, 2018)) %>% 
+  filter(site == "AQUE")
+
+mohk_abundance <- uncntd_lobster_abundance %>% 
+  filter(year == c(2012, 2018)) %>% 
+  filter(site == "MOHK")
+
+carp_abundance <- uncntd_lobster_abundance %>% 
+  filter(year == c(2012, 2018)) %>% 
+  filter(site == "CARP")
+
+ggplot() +
+  geom_density(
+    data = ivee_abundance, 
+    aes(x = size_mm, group = year, fill = year)) +
+  geom_density(
+    data = napl_abundance,
+    aes(x = size_mm, group = year, fill = year)
+  ) +
+  geom_density(
+    data = aque_abundance,
+    aes(x = size_mm, group = year, fill = year)
+  ) +
+  geom_density(
+    data = mohk_abundance,
+    aes(x = size_mm, group = year, fill = year)
+  ) +
+  geom_density(
+    data = carp_abundance,
+    aes(x = size_mm, group = year, fill = year)
+  ) +
+  facet_wrap(~site)
+
+#ggplot(data = ivee_abundance,
+ #      aes(
+  #       x = size_mm,
+   #      group = year,
+    #     fill = year
+     #  )) +
+  #geom_density()
+```
+
+
+
+#### Results C
+
+```{r}
+# Compare mean lobster sizes at MPA vs. non-MPA sites in 2012 and 2018
+# Consolidate the size observations into only two groups, MPA and non-MPA lobsters
+
+
+```
+
+
+### Summary
+
+
+### References
