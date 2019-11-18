@@ -6,14 +6,17 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r}
+```{r include = FALSE}
 # install packages and read in data
 library(tidyverse)
 library(janitor)
 library(tidyr)
+library(knitr)
+library(effsize)
+library(kableExtra)
 
 lobster_abundance <-  read_csv("lobster_abundance_sbc_lter.csv") %>% 
   clean_names() #%>% 
@@ -22,13 +25,35 @@ lobster_abundance <-  read_csv("lobster_abundance_sbc_lter.csv") %>%
 
 ### Introduction
 
+The California Spiny Lobster (Panulirus interruptus) can be found along the west coast of North America from Monterey Bay, California down to Baja California, Mexico. It is a commercially and ecologically important species. In the 2014-2015 fishing season, commercial vessels landed about 430.9 metric tons of spiny lobster along the west coast. Spiny lobsters add about 33 to 40 million dollars annually to the California economy. They also function as a key predator in kelp forests along the coast of Southern California (CA Lobster FMP). 
+
+A few changes in the past ten years have led the California Department of Fish and Wildlife to evaluate the management of the fishery. First, a series of Marine Protected Areas (MPA's) were instituted along the Southern California coast in 2012 in accordance with the Marine Life Management Act (MLMA). In addition,  the value per pound of lobsters has increased in the past few years, as have commercial fishing pressures (CA Lobster FMP).
+
+Here, we evaluate how size and abundance has varied between protected and unprotected sites along Santa Barbara Channel between 2012 and 2018.
+
+
+* key predatory species in kelp forests on the socal coast
+* five SBC long term ecological research reef sites located in our out of MPAs
+* 2011 - CDFW concluded management decisions were maintaining stability in CA lobster stock
+* mimimum size limits - makes it so lobsters have time to reproduce a couple of times before they're commercially viable
+* seasonal closure (march-oct) during lobster spawning season
+* increase in the amount commercial fishers can get per pound in recent years
+* also an increase in the amount of lobster collection occurring in the past few years
+* also recreationally important; with some inconsistent catch reporting that may not fully reflect catch
+* 2012 - a series of new MPA's put into effect around socal
+* potential benefits: provide a safe haven for lobsters
+* potential downfalls: increase catch pressure in non-protected areas
+
 
 ### Data and Methods
 
+Divers collected observations of spiny lobster abundance and size at five sites along the Santa Barbara Channel between 2012 and 2018 as part of the Santa Barbara Channel Long-Term Ecological Research effort. Two of those sites, Isla Vista (IVEE) and Naples (NAPL), are located within MPAs. Isla Vista and Naples were both established as MPAs at the start of 2012. The other three sites, Arroyo Quemado (AQUE), Carpinteria (CARP), and Mohawk (MOHK), are not protected. Observations were collected every two to four weeks at the end of summer each year so as to precede the start of the fishing season.
 
 ### Results
 
-#### Results A
+#### Results A: How has lobster abundance changed over time at each site?
+
+Total spiny lobster abundance across sites  has increased between 2012 and 2018 (Figure 1). Abundance at the Carpinteria and Isla Vista sites in particular have increased, although lobster levels declined in 2018 at the Carpinteria site. Mohawk and Naples have shown very modest increases in abundance. Abundance at Arroyo Quemado has remained nearly constant.
 
 ```{r}
 # visually explore changes in annual lobster abundance (counts) by site
@@ -38,12 +63,20 @@ lobster_abundance <-  read_csv("lobster_abundance_sbc_lter.csv") %>%
 yr_lobster_abundance <- lobster_abundance %>% 
   group_by(year)
 
-ggplot(data = yr_lobster_abundance, aes(x = year, y = count)) +
-  geom_col(aes(fill = site))
-```
-Figure 1: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL) are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP),
+counted_mpa_status_lobster <- yr_lobster_abundance %>% 
+  mutate(status = case_when(
+    site %in% c("CARP", "MOHK", "AQUE") ~ "non-MPA", TRUE ~ "MPA"))
 
-Total spiny lobster abundance across sites generally seems to have increased between 2012 and 2018. Abundance at the CARP and IVEE sites in particular have increased. Abundance at AQUE has remained nearly constant.
+ggplot(data = counted_mpa_status_lobster, aes(x = year, y = count)) +
+  geom_col(aes(fill = status), show.legend = FALSE) +
+  facet_wrap(~site) +
+  labs(
+    x = "Year",
+    y = "Lobsters counted",
+    title = "Santa Barbara Channel lobster abundance"
+  )
+```
+Figure 1: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL), are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP), are outside.
 
 #### Results B
 
@@ -80,24 +113,37 @@ carp_abundance <- uncntd_lobster_abundance %>%
 ggplot() +
   geom_density(
     data = ivee_abundance, 
-    aes(x = size_mm, group = year, fill = year)) +
+    aes(x = size_mm, group = year, fill = year),
+    show.legend = FALSE,
+    alpha = 0.6) +
   geom_density(
     data = napl_abundance,
-    aes(x = size_mm, group = year, fill = year)
+    aes(x = size_mm, group = year, fill = year),
+    show.legend = FALSE,
+    alpha = 0.6
   ) +
   geom_density(
     data = aque_abundance,
-    aes(x = size_mm, group = year, fill = year)
+    aes(x = size_mm, group = year, fill = year),
+    show.legend = FALSE,
+    alpha = 0.6
   ) +
   geom_density(
     data = mohk_abundance,
-    aes(x = size_mm, group = year, fill = year)
+    aes(x = size_mm, group = year, fill = year),
+    show.legend = FALSE,
+    alpha = 0.6
   ) +
   geom_density(
     data = carp_abundance,
-    aes(x = size_mm, group = year, fill = year)
+    aes(x = size_mm, group = year, fill = year),
+    show.legend = FALSE,
+    alpha = 0.6
   ) +
-  facet_wrap(~site)
+  facet_wrap(~site) +
+  labs(x = "Lobster length (mm)",
+       y = "Density",
+       title = "Lobster size distributions")
 
 #ggplot(data = ivee_abundance,
  #      aes(
@@ -107,12 +153,12 @@ ggplot() +
      #  )) +
   #geom_density()
 ```
-
+Figure 2. Size distributions for lobsters at five sites in 2012 and 2018.
 
 
 #### Results C
 
-```{r}
+```{r include = TRUE, echo = FALSE}
 # Compare mean lobster sizes at MPA vs. non-MPA sites in 2012 and 2018
 # Consolidate the size observations into only two groups, MPA and non-MPA lobsters
 
@@ -128,7 +174,7 @@ mpa_status_lobster <- uncntd_lobster_abundance %>%
 #answer 4 questions
 # 1. For 2012 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
 
-mpa_2012_sample_ <- mpa_status_lobster %>%
+mpa_2012_sample <- mpa_status_lobster %>%
   filter(year == 2012) %>% 
   filter(status == "MPA") %>% 
   pull(size_mm)
@@ -138,18 +184,77 @@ non_mpa_2012_sample <- mpa_status_lobster %>%
   filter(status == "non-MPA") %>% 
   pull(size_mm)
 
-
+status_2012_ttest <- t.test(mpa_2012_sample, non_mpa_2012_sample)
+status_2012_ttest
 
 ```
 
 
 ```{r}
 # 2. For 2018 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
-# 3. For MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
-# 4. For non-MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
+
+mpa_2018_sample <- mpa_status_lobster %>% 
+  filter(year == 2018) %>% 
+  filter(status == "MPA") %>% 
+  pull(size_mm)
+
+non_mpa_2018_sample <- mpa_status_lobster %>% 
+  filter(year == 2018) %>% 
+  filter(status == "non-MPA") %>% 
+  pull(size_mm)
+
+status_2018_ttest <- t.test(mpa_2018_sample, non_mpa_2018_sample)
+status_2018_ttest
 ```
+
+```{r}
+# 3. For MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
+
+mpa_2012_2018_ttest <- t.test(mpa_2012_sample, mpa_2018_sample)
+mpa_2012_2018_ttest
+
+```
+
+
+```{r}
+# 4. For non-MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
+
+non_mpa_2012_2018_ttest <- t.test(non_mpa_2012_sample, non_mpa_2018_sample)
+non_mpa_2012_2018_ttest
+
+```
+
+Table 1.
+```{r}
+lobster_2012_2018 <- mpa_status_lobster %>% 
+  filter(year == c(2012, 2018))
+
+# lobster_summary <- lobster_2012_2018 %>% 
+#   group_by(status) %>% 
+#   summarize(
+#     mean_size = mean(size_mm, na.rm = TRUE),
+#     sd_size = sd(size_mm, na.rm = TRUE)
+#   )
+# lobster_summary
+
+lobster_summary <- lobster_2012_2018 %>%
+  group_by(status, year) %>%
+  summarize(
+    mean_size = mean(size_mm, na.rm = TRUE),
+    sd_size = sd(size_mm, na.rm = TRUE),
+    sample_n = n()
+  )
+
+lobster_summary
+
+kable(lobster_summary)
+```
+
 
 ### Summary
 
 
 ### References
+
+https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=121938&inline
+https://www.wildlife.ca.gov/Conservation/Marine/Lobster-FMP
