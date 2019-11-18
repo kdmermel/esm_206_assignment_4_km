@@ -76,9 +76,11 @@ ggplot(data = counted_mpa_status_lobster, aes(x = year, y = count)) +
     title = "Santa Barbara Channel lobster abundance"
   )
 ```
-Figure 1: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL), are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP), are outside.
+**Figure 1**: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL), are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP), are outside.
 
-#### Results B
+#### Results B: How are lobster sizes distributed at each site in 2012 and 2018?
+
+Modal lobster size increased in the two protected sites, Isla Vista and Naples, from 2012 to 2018 (Figure 2). There was not a clear change in modal size for lobsters in the unprotected sites, Arroyo Quemado, Carpinteria, and Mohawk, although variation in lobster size seems to have declined between 2012 and 2018 at the Carpinteria site (Figure 2).
 
 ```{r}
 # visually explore lobster size distribution shifts by comparing lobster sizes in 2012 and 2018
@@ -153,12 +155,14 @@ ggplot() +
      #  )) +
   #geom_density()
 ```
-Figure 2. Size distributions for lobsters at five sites in 2012 and 2018.
+**Figure 2**: Size distributions for lobsters at the five sites in 2012 and 2018. Isla Vista (IVEE) and Naples (NAPL) are within Marine Protected Areas; Arroyo Quemado (AQUE), Carpinteria (CARP), and Mohawk (MOHK) are not protected.
 
 
-#### Results C
+#### Results C: How did mean lobster size change between 2012 and 2018 at protected and unprotected sites?
 
-```{r include = TRUE, echo = FALSE}
+
+
+```{r}
 # Compare mean lobster sizes at MPA vs. non-MPA sites in 2012 and 2018
 # Consolidate the size observations into only two groups, MPA and non-MPA lobsters
 
@@ -170,7 +174,7 @@ mpa_status_lobster <- uncntd_lobster_abundance %>%
 
 
 
-```{r}
+```{r include = FALSE}
 #answer 4 questions
 # 1. For 2012 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
 
@@ -190,7 +194,9 @@ status_2012_ttest
 ```
 
 
-```{r}
+
+
+```{r include = FALSE}
 # 2. For 2018 observations, is there a significant difference in lobster size between MPA and non-MPA sites?
 
 mpa_2018_sample <- mpa_status_lobster %>% 
@@ -207,7 +213,7 @@ status_2018_ttest <- t.test(mpa_2018_sample, non_mpa_2018_sample)
 status_2018_ttest
 ```
 
-```{r}
+```{r include = FALSE}
 # 3. For MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
 
 mpa_2012_2018_ttest <- t.test(mpa_2012_sample, mpa_2018_sample)
@@ -216,7 +222,7 @@ mpa_2012_2018_ttest
 ```
 
 
-```{r}
+```{r include = FALSE}
 # 4. For non-MPA sites only, is there a significant mean size difference in lobsters observed in 2012 vs. 2018?
 
 non_mpa_2012_2018_ttest <- t.test(non_mpa_2012_sample, non_mpa_2018_sample)
@@ -224,18 +230,14 @@ non_mpa_2012_2018_ttest
 
 ```
 
-Table 1.
+In 2012, the year that the Santa Barbara Channel MPAs were established, lobsters observed at sites within MPAs were actually smaller on average (65.69 mm) than those observed outside of MPAs (75.87 mm) (t(`r round(status_2012_ttest$parameter, 2)`) = `r round(status_2012_ttest$statistic, 2)`, *p* < 0.01). By 2018, the opposite trend was true; lobsters within MPAs were on average larger (77.79 mm) than those outside of MPA boundaries (73.91) (t(`r round(status_2018_ttest$parameter, 2)`) = `r round(status_2018_ttest$statistic, 2)`, *p* < 0.01).
+
+In fact, mean lobster size within MPAs increased between 2012 (65.69 mm) and 2018 (77.79 mm) by over 12 mm (t(`r round(mpa_2012_2018_ttest$parameter, 2)`) = `r round(mpa_2012_2018_ttest$statistic, 2)`, *p* < 0.01). Meanwhile, mean lobster size at sites outside the MPAs showed no significant change between 2012 and 2018 (t(`r round(non_mpa_2012_2018_ttest$parameter, 2)`) = `r round(non_mpa_2012_2018_ttest$statistic, 2)`, *p* > 0.01)
+
+**Table 1**: Summary statistics for spiny lobster size in 2012 and 2018, within and outside of Marine Protected Areas.
 ```{r}
 lobster_2012_2018 <- mpa_status_lobster %>% 
   filter(year == c(2012, 2018))
-
-# lobster_summary <- lobster_2012_2018 %>% 
-#   group_by(status) %>% 
-#   summarize(
-#     mean_size = mean(size_mm, na.rm = TRUE),
-#     sd_size = sd(size_mm, na.rm = TRUE)
-#   )
-# lobster_summary
 
 lobster_summary <- lobster_2012_2018 %>%
   group_by(status, year) %>%
@@ -245,14 +247,38 @@ lobster_summary <- lobster_2012_2018 %>%
     sample_n = n()
   )
 
-lobster_summary
+lobster_summary %>% 
+  kable(col.names = c("Status",
+                      "Year",
+                      "Mean (mm)",
+                      "Standard deviation (mm)",
+                      "Sample count")) %>% 
+  kable_styling(bootstrap_options = "striped",
+                full_width = F,
+                position = "left") %>% 
+  add_header_above(c("Lobster size metrics"= 5))
 
-kable(lobster_summary)
+
+#kable(lobster_summary)
+
+#trees_sub %>% 
+ # kable(col.names = c("Diameter (inches)", 
+ #                    "Height (ft)", 
+  #                   "Volume (cubic feet)")
+   #     ) %>% 
+  #kable_styling(bootstrap_options = "striped", 
+   #             full_width = F,
+    #            position = "left"
+     #           ) %>% 
+  #add_header_above(c("Black cherry tree metrics" = 3))
 ```
 
 
 ### Summary
 
+* When MPAs were designated in the Santa Barbara Channel in 2012, average California spiny lobster (*Panulirus interruptus*) length was greater outside of MPAs than inside them (Table 1)
+* Average length of spiny lobsters in MPAs increased between 2012 and 2018, while lobster length remained on average unchanged at non-MPA sites (Table 1)
+* In 2018, lobster lengths were on average greater within MPAs than outside of them (Table 1)
 
 ### References
 
