@@ -1,5 +1,5 @@
 ---
-title: "Lobster lab report"
+title: "Effects of protection status on California spiny lobster (*Panulirus interruptus*) size and abundance in the Santa Barbara Channel"
 author: "Kazia Mermel"
 date: "11/15/2019"
 output: html_document
@@ -25,25 +25,11 @@ lobster_abundance <-  read_csv("lobster_abundance_sbc_lter.csv") %>%
 
 ### Introduction
 
-The California Spiny Lobster (Panulirus interruptus) can be found along the west coast of North America from Monterey Bay, California down to Baja California, Mexico. It is a commercially and ecologically important species. In the 2014-2015 fishing season, commercial vessels landed about 430.9 metric tons of spiny lobster along the west coast. Spiny lobsters add about 33 to 40 million dollars annually to the California economy. They also function as a key predator in kelp forests along the coast of Southern California (CA Lobster FMP). 
+The California Spiny Lobster (*Panulirus interruptus*) can be found along the west coast of North America from Monterey Bay, California down to Baja California, Mexico. It is a commercially and ecologically important species. In the 2014-2015 fishing season, commercial vessels landed about 430.9 metric tons of spiny lobster along the west coast. Spiny lobsters add about 33 to 40 million dollars annually to the California economy. They also function as a key predator in kelp forests along the coast of Southern California (CA Lobster FMP). 
 
 A few changes in the past ten years have led the California Department of Fish and Wildlife to evaluate the management of the fishery. First, a series of Marine Protected Areas (MPA's) were instituted along the Southern California coast in 2012 in accordance with the Marine Life Management Act (MLMA). In addition,  the value per pound of lobsters has increased in the past few years, as have commercial fishing pressures (CA Lobster FMP).
 
 Here, we evaluate how size and abundance has varied between protected and unprotected sites along Santa Barbara Channel between 2012 and 2018.
-
-
-* key predatory species in kelp forests on the socal coast
-* five SBC long term ecological research reef sites located in our out of MPAs
-* 2011 - CDFW concluded management decisions were maintaining stability in CA lobster stock
-* mimimum size limits - makes it so lobsters have time to reproduce a couple of times before they're commercially viable
-* seasonal closure (march-oct) during lobster spawning season
-* increase in the amount commercial fishers can get per pound in recent years
-* also an increase in the amount of lobster collection occurring in the past few years
-* also recreationally important; with some inconsistent catch reporting that may not fully reflect catch
-* 2012 - a series of new MPA's put into effect around socal
-* potential benefits: provide a safe haven for lobsters
-* potential downfalls: increase catch pressure in non-protected areas
-
 
 ### Data and Methods
 
@@ -78,7 +64,7 @@ ggplot(data = counted_mpa_status_lobster, aes(x = year, y = count)) +
 ```
 **Figure 1**: Total annual lobster abundance at each of five sites in the Santa Barbara Channel between 2012 and 2018. Two of these collection sites, Isla Vista (IVEE) and Naples (NAPL), are located within Marine Protected Areas. Three, Arroyo Quemado (AQUE), Mohawk (MOHK), and Carpinteria (CARP), are outside.
 
-#### Results B: How are lobster sizes distributed at each site in 2012 and 2018?
+#### Results B: How were lobster sizes distributed at each site in 2012 and 2018?
 
 Modal lobster size increased in the two protected sites, Isla Vista and Naples, from 2012 to 2018 (Figure 2). There was not a clear change in modal size for lobsters in the unprotected sites, Arroyo Quemado, Carpinteria, and Mohawk, although variation in lobster size seems to have declined between 2012 and 2018 at the Carpinteria site (Figure 2).
 
@@ -92,23 +78,27 @@ Modal lobster size increased in the two protected sites, Isla Vista and Naples, 
 uncntd_lobster_abundance <- lobster_abundance %>% 
   tidyr::uncount(count)
 
-ivee_abundance <- uncntd_lobster_abundance %>%
+mpa_status_lobster <- uncntd_lobster_abundance %>% 
+  mutate(status = case_when(
+    site %in% c("CARP", "MOHK", "AQUE") ~ "non-MPA", TRUE ~ "MPA"))
+
+ivee_abundance <- mpa_status_lobster %>%
   filter(year == c(2012, 2018)) %>% 
   filter(site == "IVEE")
 
-napl_abundance <- uncntd_lobster_abundance %>%
+napl_abundance <- mpa_status_lobster %>%
   filter(year == c(2012, 2018)) %>% 
   filter(site == "NAPL")
 
-aque_abundance <- uncntd_lobster_abundance %>%
+aque_abundance <- mpa_status_lobster %>%
   filter(year == c(2012, 2018)) %>% 
   filter(site == "AQUE")
 
-mohk_abundance <- uncntd_lobster_abundance %>% 
+mohk_abundance <- mpa_status_lobster %>% 
   filter(year == c(2012, 2018)) %>% 
   filter(site == "MOHK")
 
-carp_abundance <- uncntd_lobster_abundance %>% 
+carp_abundance <- mpa_status_lobster %>% 
   filter(year == c(2012, 2018)) %>% 
   filter(site == "CARP")
 
@@ -145,30 +135,36 @@ ggplot() +
   facet_wrap(~site) +
   labs(x = "Lobster length (mm)",
        y = "Density",
-       title = "Lobster size distributions")
+       title = "Lobster size distributions") +
+  theme_minimal() +
+  annotate(
+    geom = "text", 
+    x = 115, 
+    y = 0.03,
+    label = "2012",
+    color = "black",
+    size = 2.5) +
+  annotate(
+    geom = "text", 
+    x = 115, 
+    y = 0.02,
+    label = "2018",
+    color = "dodgerblue",
+    alpha = 1,
+    size = 2.5)
 
-#ggplot(data = ivee_abundance,
- #      aes(
-  #       x = size_mm,
-   #      group = year,
-    #     fill = year
-     #  )) +
-  #geom_density()
+
+#theme(plot.background = element_rect(fill = "yellow"), axis.ticks = element_line(size = 1))
 ```
 **Figure 2**: Size distributions for lobsters at the five sites in 2012 and 2018. Isla Vista (IVEE) and Naples (NAPL) are within Marine Protected Areas; Arroyo Quemado (AQUE), Carpinteria (CARP), and Mohawk (MOHK) are not protected.
 
-
 #### Results C: How did mean lobster size change between 2012 and 2018 at protected and unprotected sites?
-
 
 
 ```{r}
 # Compare mean lobster sizes at MPA vs. non-MPA sites in 2012 and 2018
 # Consolidate the size observations into only two groups, MPA and non-MPA lobsters
 
-mpa_status_lobster <- uncntd_lobster_abundance %>% 
-  mutate(status = case_when(
-    site %in% c("CARP", "MOHK", "AQUE") ~ "non-MPA", TRUE ~ "MPA"))
 
 ```
 
@@ -190,7 +186,6 @@ non_mpa_2012_sample <- mpa_status_lobster %>%
 
 status_2012_ttest <- t.test(mpa_2012_sample, non_mpa_2012_sample)
 status_2012_ttest
-
 ```
 
 
@@ -218,7 +213,6 @@ status_2018_ttest
 
 mpa_2012_2018_ttest <- t.test(mpa_2012_sample, mpa_2018_sample)
 mpa_2012_2018_ttest
-
 ```
 
 
@@ -227,7 +221,6 @@ mpa_2012_2018_ttest
 
 non_mpa_2012_2018_ttest <- t.test(non_mpa_2012_sample, non_mpa_2018_sample)
 non_mpa_2012_2018_ttest
-
 ```
 
 In 2012, the year that the Santa Barbara Channel MPAs were established, lobsters observed at sites within MPAs were actually smaller on average (65.69 mm) than those observed outside of MPAs (75.87 mm) (t(`r round(status_2012_ttest$parameter, 2)`) = `r round(status_2012_ttest$statistic, 2)`, *p* < 0.01). By 2018, the opposite trend was true; lobsters within MPAs were on average larger (77.79 mm) than those outside of MPA boundaries (73.91) (t(`r round(status_2018_ttest$parameter, 2)`) = `r round(status_2018_ttest$statistic, 2)`, *p* < 0.01).
@@ -257,20 +250,6 @@ lobster_summary %>%
                 full_width = F,
                 position = "left") %>% 
   add_header_above(c("Lobster size metrics"= 5))
-
-
-#kable(lobster_summary)
-
-#trees_sub %>% 
- # kable(col.names = c("Diameter (inches)", 
- #                    "Height (ft)", 
-  #                   "Volume (cubic feet)")
-   #     ) %>% 
-  #kable_styling(bootstrap_options = "striped", 
-   #             full_width = F,
-    #            position = "left"
-     #           ) %>% 
-  #add_header_above(c("Black cherry tree metrics" = 3))
 ```
 
 
@@ -282,5 +261,6 @@ lobster_summary %>%
 
 ### References
 
-https://nrm.dfg.ca.gov/FileHandler.ashx?DocumentID=121938&inline
-https://www.wildlife.ca.gov/Conservation/Marine/Lobster-FMP
+"California Spiny Lobster Fishery Management Plan." California Department of Fish and Wildlife Marine Region, 2016, https://www.wildlife.ca.gov/Conservation/Marine/Lobster-FMP.
+
+"Santa Barbara Coastal Long-Term Ecological Research." Santa Barbara Coastal LTER, 2019, https://sbclter.msi.ucsb.edu/.
